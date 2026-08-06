@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registration Confirmed — Connexion 26</title>
+<meta name="theme-color" content="#0B0B14">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { theme: { extend: { fontFamily: {
+    display: ['Space Grotesk','sans-serif'], body: ['Inter','sans-serif'], mono: ['JetBrains Mono','monospace']
+  }}}}
+</script>
+<link rel="stylesheet" href="style.css">
+<style>
+  html, body { max-width: 100vw; overflow-x: hidden; }
+</style>
+</head>
+<body class="font-body">
+
+<div id="loader"><div class="brand-loader"><div class="brand-loader__ring"><img src="loader-logo.jpg" alt="Connexion 26" class="brand-loader__mark"></div></div></div>
+
+<header class="navbar scrolled">
+  <div class="max-w-3xl mx-auto px-6 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-3">
+      <img src="logo.png.jpeg" alt="Connexion 26 logo" class="w-9 h-9 rounded-full object-cover">
+      <span class="font-display font-bold text-lg">Connexion <span class="text-cyan-400">26</span></span>
+    </a>
+  </div>
+</header>
+
+<main class="max-w-2xl mx-auto px-6 pt-32 pb-24">
+  <div class="text-center mb-10">
+    <svg class="success-ring mx-auto mb-6" viewBox="0 0 100 100">
+      <circle class="track" cx="50" cy="50" r="42"></circle>
+      <circle class="prog" cx="50" cy="50" r="42"></circle>
+      <path class="success-check" d="M32 52 L45 65 L70 36" fill="none" stroke="#10B981" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></path>
+    </svg>
+    <h1 class="font-display text-3xl md:text-4xl font-bold mb-3">You're in!</h1>
+    <p class="text-[var(--text-dim)]">Your seat is confirmed. Save this page or download your receipt below.</p>
+  </div>
+
+  <div id="receiptCard" class="glass rounded-3xl p-8">
+    <div class="flex items-center justify-between mb-6 pb-6" style="border-bottom:1px dashed var(--line)">
+      <div>
+        <div class="text-xs text-[var(--text-dim)] font-mono uppercase tracking-wide mb-1">Registration ID</div>
+        <div class="font-display text-xl font-bold font-mono" id="rRegId">—</div>
+      </div>
+      <div class="w-9 h-9 rounded-full shrink-0" style="background:var(--beam)"></div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-y-5 gap-x-4 mb-6">
+      <div><div class="text-xs text-[var(--text-dim)] mb-1">Participant</div><div class="font-medium" id="rName">—</div></div>
+      <div><div class="text-xs text-[var(--text-dim)] mb-1">Event</div><div class="font-medium" id="rEvent">—</div></div>
+      <div><div class="text-xs text-[var(--text-dim)] mb-1">Date</div><div class="font-medium" id="rDate">—</div></div>
+      <div><div class="text-xs text-[var(--text-dim)] mb-1">Time</div><div class="font-medium" id="rTime">—</div></div>
+      <div class="col-span-2"><div class="text-xs text-[var(--text-dim)] mb-1">Venue</div><div class="font-medium" id="rVenue">—</div></div>
+    </div>
+
+    <div class="flex flex-col items-center gap-3 pt-6" style="border-top:1px dashed var(--line)">
+      <div id="qrcode" class="p-3 bg-white rounded-xl"></div>
+      <div class="text-xs text-[var(--text-dim)] font-mono">Show this QR at the event entry desk</div>
+    </div>
+  </div>
+
+  <div class="flex flex-col sm:flex-row gap-4 mt-8">
+    <button id="downloadBtn" class="btn btn-primary flex-1"><i class="fa-solid fa-download"></i> Download Receipt</button>
+    <a href="index.html" class="btn btn-ghost flex-1"><i class="fa-solid fa-house"></i> Back to Home</a>
+  </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+window.addEventListener("load", () => document.getElementById("loader")?.classList.add("hidden"));
+
+const params = new URLSearchParams(window.location.search);
+const data = {
+  regId: params.get("regId") || "SPEC26-000000",
+  name: params.get("name") || "Guest",
+  event: params.get("event") || "—",
+  date: params.get("date") || "—",
+  time: params.get("time") || "—",
+  venue: params.get("venue") || "—",
+};
+
+document.getElementById("rRegId").textContent = data.regId;
+document.getElementById("rName").textContent = data.name;
+document.getElementById("rEvent").textContent = data.event;
+document.getElementById("rDate").textContent = data.date;
+document.getElementById("rTime").textContent = data.time;
+document.getElementById("rVenue").textContent = data.venue;
+
+new QRCode(document.getElementById("qrcode"), {
+  text: data.regId,
+  width: 140,
+  height: 140,
+  colorDark: "#0B0B14",
+  colorLight: "#ffffff",
+});
+
+document.getElementById("downloadBtn").addEventListener("click", async () => {
+  const btn = document.getElementById("downloadBtn");
+  btn.disabled = true;
+  const original = btn.innerHTML;
+  btn.innerHTML = '<span class="spinner"></span> Preparing…';
+  try {
+    const canvas = await buildReceiptCanvas(data);
+    const link = document.createElement("a");
+    link.download = `${data.regId}-receipt.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  } catch (err) {
+    console.error(err);
+    alert("Couldn't generate the receipt image. Please take a screenshot instead.");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = original;
+  }
+});
+
+/**
+ * Draws the receipt on a plain <canvas> instead of screenshotting the DOM.
+ * The on-page card uses backdrop-filter / color-mix(), which html2canvas
+ * (and most DOM-to-image libraries) can't parse — it used to fail there.
+ * A hand-drawn canvas has no such dependency, so it always works.
+ */
+async function buildReceiptCanvas(d) {
+  if (document.fonts && document.fonts.ready) {
+    try { await document.fonts.ready; } catch { /* non-fatal */ }
+  }
+
+  const dpr = 2;
+  const W = 720, H = 980;
+  const canvas = document.createElement("canvas");
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+
+  const bg = cssVar("--bg", "#07070d");
+  const bgCard = cssVar("--bg-card", "#121426");
+  const line = "rgba(255,255,255,0.16)";
+  const text = cssVar("--text", "#F5F5F7");
+  const textDim = cssVar("--text-dim", "#A1A3BD");
+
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  const pad = 36;
+  roundRect(ctx, pad, pad, W - pad * 2, H - pad * 2, 28);
+  ctx.fillStyle = bgCard;
+  ctx.fill();
+  ctx.strokeStyle = line;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  const cx = pad + 40;
+  const rightX = W - pad - 40;
+  let cy = pad + 68;
+
+  try {
+    const logo = await loadImage("logo.png.jpeg");
+    ctx.save();
+    roundRect(ctx, cx, cy - 40, 44, 44, 12);
+    ctx.clip();
+    ctx.drawImage(logo, cx, cy - 40, 44, 44);
+    ctx.restore();
+  } catch { /* logo optional — receipt still works without it */ }
+
+  ctx.fillStyle = text;
+  ctx.font = "700 22px 'Space Grotesk', sans-serif";
+  ctx.fillText("Connexion 26", cx + 56, cy - 12);
+  ctx.fillStyle = textDim;
+  ctx.font = "600 11px 'JetBrains Mono', monospace";
+  ctx.fillText("REGISTRATION RECEIPT", cx + 56, cy + 8);
+
+  cy += 44;
+  dashedLine(ctx, pad + 24, cy, W - pad - 24, cy, line);
+  cy += 34;
+
+  ctx.fillStyle = textDim;
+  ctx.font = "600 11px 'JetBrains Mono', monospace";
+  ctx.fillText("REGISTRATION ID", cx, cy);
+  cy += 24;
+  ctx.fillStyle = text;
+  ctx.font = "700 22px 'JetBrains Mono', monospace";
+  ctx.fillText(d.regId, cx, cy);
+  cy += 40;
+
+  dashedLine(ctx, pad + 24, cy, W - pad - 24, cy, line);
+  cy += 34;
+
+  const colW = (rightX - cx) / 2 - 12;
+  cy = drawFieldRow(ctx, cx, colW, cy, "PARTICIPANT", d.name, "EVENT", d.event, text, textDim);
+  cy += 16;
+  cy = drawFieldRow(ctx, cx, colW, cy, "DATE", d.date, "TIME", d.time, text, textDim);
+  cy += 16;
+
+  ctx.fillStyle = textDim;
+  ctx.font = "600 11px 'JetBrains Mono', monospace";
+  ctx.fillText("VENUE", cx, cy);
+  cy += 22;
+  ctx.fillStyle = text;
+  ctx.font = "600 16px 'Inter', sans-serif";
+  wrapLines(ctx, d.venue, rightX - cx).forEach((ln) => { ctx.fillText(ln, cx, cy); cy += 22; });
+  cy += 16;
+
+  dashedLine(ctx, pad + 24, cy, W - pad - 24, cy, line);
+  cy += 34;
+
+  const qrSource = document.querySelector("#qrcode canvas") || document.querySelector("#qrcode img");
+  const qrSize = 150;
+  const qrPad = 14;
+  const boxW = qrSize + qrPad * 2;
+  const qrX = W / 2 - boxW / 2;
+  ctx.fillStyle = "#ffffff";
+  roundRect(ctx, qrX, cy, boxW, boxW, 16);
+  ctx.fill();
+  if (qrSource) ctx.drawImage(qrSource, qrX + qrPad, cy + qrPad, qrSize, qrSize);
+  cy += boxW + 26;
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = textDim;
+  ctx.font = "500 12px 'JetBrains Mono', monospace";
+  ctx.fillText("Show this QR at the event entry desk", W / 2, cy);
+  ctx.textAlign = "left";
+
+  return canvas;
+}
+
+function drawFieldRow(ctx, cx, colW, cy, l1, v1, l2, v2, text, textDim) {
+  ctx.fillStyle = textDim;
+  ctx.font = "600 11px 'JetBrains Mono', monospace";
+  ctx.fillText(l1, cx, cy);
+  ctx.fillText(l2, cx + colW + 24, cy);
+  cy += 22;
+  ctx.fillStyle = text;
+  ctx.font = "600 16px 'Inter', sans-serif";
+  const lines1 = wrapLines(ctx, v1, colW);
+  const lines2 = wrapLines(ctx, v2, colW);
+  const rows = Math.max(lines1.length, lines2.length);
+  for (let i = 0; i < rows; i++) {
+    if (lines1[i]) ctx.fillText(lines1[i], cx, cy + i * 22);
+    if (lines2[i]) ctx.fillText(lines2[i], cx + colW + 24, cy + i * 22);
+  }
+  return cy + rows * 22;
+}
+
+function wrapLines(ctx, txt, maxWidth) {
+  const words = String(txt || "—").split(" ");
+  const lines = [];
+  let line = "";
+  words.forEach((w) => {
+    const test = line ? `${line} ${w}` : w;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines.push(line);
+      line = w;
+    } else {
+      line = test;
+    }
+  });
+  if (line) lines.push(line);
+  return lines.slice(0, 3);
+}
+
+function dashedLine(ctx, x1, y1, x2, y2, color) {
+  ctx.save();
+  ctx.setLineDash([4, 4]);
+  ctx.strokeStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function cssVar(name, fallback) {
+  const v = getComputedStyle(document.body).getPropertyValue(name).trim();
+  return v || fallback;
+}
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+</script>
+</body>
+</html>
