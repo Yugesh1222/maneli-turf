@@ -4,7 +4,7 @@
  * it online, gate access (e.g. behind your college SSO or a shared link)
  * before sharing it, since it can display participant contact details.
  */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz2vE5-7lpj_Jf4fuIXwmrLka0plsTKBTabgyVXLfSb7YKoDbt3wX6FBDlcBu0Tol7M/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwjpPBJQDFrgt1_hlbc7TjyfzBS1HSvTCZ1ZgbLi9-HKEbxGdVEm6w2uUmnu1WCTWtd/exec";
 
 /**
  * Change this before you deploy. This is a client-side deterrent only —
