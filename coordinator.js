@@ -4,7 +4,7 @@
  * coordinator name + password for an event from the admin dashboard's
  * "Event controls" panel before that event's coordinator can log in here.
  */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz8-Rc0JxZ45oF6nyM4HLiVDDuDlmNgf7Jlai2Y2FhM_CNhNIv3k8qi_r0hHAxzCz2f/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwjpPBJQDFrgt1_hlbc7TjyfzBS1HSvTCZ1ZgbLi9-HKEbxGdVEm6w2uUmnu1WCTWtd/exec";
 
 (function () {
   "use strict";
