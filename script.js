@@ -12,7 +12,7 @@
 
   /* ------------------------------------------- Event registration status */
   // Same Apps Script deployment URL used in register.js / admin.js.
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwjpPBJQDFrgt1_hlbc7TjyfzBS1HSvTCZ1ZgbLi9-HKEbxGdVEm6w2uUmnu1WCTWtd/exec";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwxqvMIZ44wnMMkGyoAw8yXHbijd9PAu944jdgAAPWSsg9meEh3lPtiBFyTxPz-jcy6/exec";
   let eventStatuses = {};
   async function loadEventStatuses() {
     if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes("YOUR_DEPLOYMENT_ID")) return;
